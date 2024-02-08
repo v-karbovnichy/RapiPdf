@@ -127,6 +127,57 @@ export default customElements.define('rapi-pdf', class RapiPdf extends HTMLEleme
       method: 'METHOD',
       ...localizeObj,
     };
+
+    this.localize = {
+      index: 'Содержание',
+      api: 'API',
+      apiList: 'Список методов API',
+      apiReference: 'Описание программного интерфейса',
+      apiVersion: 'Версия API',
+      contact: 'Контакты',
+      name: 'Наименование',
+      email: 'Электронная почта',
+      url: 'URL',
+      termsOfService: 'Условия обслуживания',
+      securityAndAuthentication: 'Безопасность и аутентификация',
+      securitySchemes: 'Схемы безопасности',
+      key: 'Название',
+      type: 'Тип',
+      example: 'Пример',
+      description: 'Описание',
+      request: 'Запрос',
+      requestBody: 'Тело запроса',
+      response: 'Ответ',
+      responseModel: 'Модель данных',
+      statusCode: 'Код ответа',
+      deprecated: 'Устаревшее',
+      allowed: 'Возможные значения',
+      default: 'По умолчанию',
+      readOnly: 'Только чтение',
+      writeOnly: 'Только запись',
+      enumValues: 'Перечисление',
+      pattern: 'Шаблон',
+      parameters: 'параметры',
+      noRequestParameters: 'Нет параметров запроса',
+      method: 'Метод',
+      of: 'из',
+      objectWithBelowStructure: 'Объект со следующей структурой',
+      arrayOfObjectWithBelowStructure: 'Массив объектов со следующей структурой',
+      // типы данных
+      boolean: 'логическое',
+      string: 'строка',
+      integer: 'целое',
+      number: 'дробное',
+      enum: 'перечисление',
+      object: 'объект',
+      array: 'массив',
+      chars: 'символов',
+      between: 'между',
+      multipleOf: 'несколько',
+      and: 'и',
+
+      ...localizeObj,
+    };
   }
 
   disconnectedCallback() {
@@ -208,7 +259,7 @@ export default customElements.define('rapi-pdf', class RapiPdf extends HTMLEleme
     const pdfSortTags = this.getAttribute('pdf-sort-tags') !== 'false';
     const pdfPrimaryColor = this.getAttribute('pdf-primary-color');
     const pdfAlternateColor = this.getAttribute('pdf-alternate-color');
-    const pdfTitle = this.getAttribute('pdf-title') === null ? 'API Reference' : this.getAttribute('pdf-title');
+    const pdfTitle = this.getAttribute('pdf-title') ? this.getAttribute('pdf-title') : '';
     const pdfCoverText = this.getAttribute('pdf-cover-text') ? this.getAttribute('pdf-cover-text') : '';
     const pdfSecurityText = this.getAttribute('pdf-security-text') ? this.getAttribute('pdf-security-text') : '';
     const pdfApiText = this.getAttribute('pdf-api-text') ? this.getAttribute('pdf-api-text') : '';

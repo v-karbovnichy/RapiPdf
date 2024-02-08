@@ -30,19 +30,76 @@
   <rapi-pdf id='rapipdf' spec-url="./specs/petstore.json" pdf-schema-style="object"> </rapi-pdf>
   <rapi-pdf id='rapipdf' spec-url="./specs/bitbucket.json"> </rapi-pdf>
   <rapi-pdf id='rapipdf' spec-url="./specs/data-types.yaml"> </rapi-pdf>
-  <rapi-pdf id='rapipdf' spec-url="./specs/data-types.yaml" include-example="true", button-label="WITH EXAMPLE"> </rapi-pdf>
+  <rapi-pdf id='rapipdf' spec-url="./specs/data-types.yaml" include-example="true" button-label="WITH EXAMPLE"> </rapi-pdf>
   <rapi-pdf id='rapipdf' spec-url="./specs/data-types.yaml" hide-input="true"> </rapi-pdf>
-  
+  <br>
+  <rapi-pdf 
+    id='rapipdf' 
+    spec-url="https://rest-svc.frmomr-dev.helpms.ru/v3/api-docs/api-rest-v2" 
+    pdf-schema-style="table"
+    hide-input="true" 
+    button-label="rest-svc api-rest-v2">
+  </rapi-pdf> 
 
+  <rapi-pdf id='rapipdf' spec-url="https://rest-svc.frmomr-dev.helpms.ru/v3/api-docs/api-rest-nmfo" hide-input="true" button-label="api-rest-nmfo"> </rapi-pdf> 
+
+  <rapi-pdf 
+    id='rapipdf' 
+    spec-url="https://eventprocessor-frmomr-dev.helpms.ru/swagger/v1.0/swagger.json" 
+    pdf-schema-style="table"
+    hide-input="true" 
+    button-label="EventProcessor API - dev">
+  </rapi-pdf> 
+
+  <rapi-pdf 
+    id='rapipdf' 
+    spec-url="https://materializedview-svc.frmomr-dev.helpms.ru/swagger/v1.1.0.111/swagger.json" 
+    pdf-schema-style="table"
+    hide-input="true" 
+    button-label="MaterializedView API">
+  </rapi-pdf> 
+
+  <rapi-pdf 
+    id='rapipdf' 
+    spec-url="https://materializedview-dev-itone.dsm-release-2-frmomr-dev.helpms.ru/swagger/v1.1.0.111/swagger.json" 
+    pdf-schema-style="table"
+    hide-input="true" 
+    button-label="MaterializedView API - doc_automation branch">
+  </rapi-pdf> 
+
+  <rapi-pdf 
+    id='rapipdf' 
+    spec-url="./specs/mv/swagger_mv_2024_02_06.json" 
+    pdf-schema-style="table"
+    hide-input="true" 
+    button-label="MaterializedView API - swagger_mv_2024_02_06.json">
+  </rapi-pdf> 
+  
+  <rapi-pdf 
+    id='rapipdf' 
+    spec-url="https://as-mo-svc.frmomr-dev.helpms.ru/swagger/v1.1.0.111/swagger.json" 
+    pdf-schema-style="table"
+    hide-input="true" 
+    button-label="Aggregators - Medical Organization API">
+  </rapi-pdf> 
+
+  <rapi-pdf 
+    id='rapipdf' 
+    spec-url="https://as-mw-svc.frmomr-dev.helpms.ru/swagger/v1.1.0.111/swagger.json" 
+    pdf-schema-style="table"
+    hide-input="true" 
+    button-label="Aggregators - Medical Worker API">
+  </rapi-pdf>   
+  <br>
+<!--   
   <button onclick="changeSpec()">Change Spec</button>
   <script type="text/javascript">
     function changeSpec(){
       let el = document.getElementById("rapipdf");
-      el.setAttribute('spec-url', 'set new attrib');
+      el.setAttribute('spec-url', 'https://rest-svc.frmomr-dev.helpms.ru/v3/api-docs/api-rest-v2');
     } 
-  </script>  
-
-
+  </script>
+ -->
 </body>
 
 </html>

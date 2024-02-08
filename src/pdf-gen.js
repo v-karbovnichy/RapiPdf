@@ -82,9 +82,11 @@ export default async function createPdf(specUrl, options) {
     footer(currentPage, pageCount) {
       return {
         margin: 10,
+        overrideUnusedVarsError: pageCount,
         columns: [
           { text: options.pdfFooterText, style: ['sub', 'gray', 'left'] },
-          { text: `${currentPage} of ${pageCount}`, style: ['sub', 'gray', 'right'] },
+          // { text: `${currentPage} ${options.localize.of} ${pageCount}`, style: ['sub', 'gray', 'right'] },
+          { text: `${currentPage}`, style: ['sub', 'gray', 'right'] },
         ],
       };
     },

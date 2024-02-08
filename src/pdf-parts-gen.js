@@ -137,7 +137,7 @@ function getParameterTableDef(parameters, paramType, localize, includeExample = 
     }
   } else {
     parameters.map((param) => {
-      const paramSchema = getTypeInfo(param.schema);
+      const paramSchema = getTypeInfo(param.schema, localize);
       tableContent.push([
         {
           text: [
@@ -167,7 +167,7 @@ function getParameterTableDef(parameters, paramType, localize, includeExample = 
   }
 
   return [
-    { text: `${paramType} ${localize.parameters}`.toUpperCase(), style: ['small', 'b'], margin: [0, 10, 0, 0] },
+    { text: `${paramType} ${localize.parameters}`, style: ['small', 'b'], margin: [0, 10, 0, 0] },
     {
       table: {
         headerRows: 1,
@@ -207,63 +207,87 @@ function getRequestBodyDef(requestBody, schemaStyle, localize, includeExample = 
     return;
   }
   const content = [];
-  let formParamDef;
+  const schemaMap = new Map();
+
+  // Grouping content types by schema reference
   for (const contentType in requestBody.content) {
-    const contentTypeObj = requestBody.content[contentType];
+    const schema = requestBody.content[contentType].schema;
+    const schemaRef = schema.type === 'object'
+      ? schema.$$ref
+      : JSON.stringify(schema);
+    if (schemaRef) {
+      if (!schemaMap.has(schemaRef)) {
+        schemaMap.set(schemaRef, []);
+      }
+      schemaMap.get(schemaRef).push(contentType);
+    } else {
+      debugger;
+    }
+  }
+
+  // Iterating over unique schemas
+  // eslint-disable-next-line no-unused-vars
+  for (const [schemaRef, contentTypes] of schemaMap) {
+    const contentTypeStr = contentTypes.join(', ');
+    const contentTypeObj = requestBody.content[contentTypes[0]]; // Assuming all content types in a group have the same schema
+
     const requestBodyDef = [
-      { text: `${localize.requestBody} - ${contentType}`, margin: [0, 10, 0, 0], style: ['small', 'b'] },
+      { text: `${localize.requestBody} - ${contentTypeStr}`, margin: [0, 10, 0, 0], style: ['small', 'b'] },
     ];
 
-    if ((contentType.includes('form') || contentType.includes('multipart-form')) && contentTypeObj.schema) {
-      formParamDef = getParameterTableDef(contentTypeObj.schema.properties, 'FORM DATA', localize);
-      content.push(formParamDef);
-    } else if (contentType.includes('json') || contentType.includes('xml')) {
-      let origSchema = requestBody.content[contentType].schema;
-      if (origSchema) {
-        origSchema = JSON.parse(JSON.stringify(origSchema));
-        const schemaInObjectNotaion = schemaInObjectNotation(origSchema);
+    // Processing the schema
+    
+    // TODO: include multipart-form from previous code
+    // if ((contentType.includes('form') || contentType.includes('multipart-form')) && contentTypeObj.schema) {
+    //   formParamDef = getParameterTableDef(contentTypeObj.schema.properties, 'FORM DATA', localize);
+    //   content.push(formParamDef);
+    // }
+    let origSchema = contentTypeObj.schema;
+    if (origSchema) {
+      origSchema = JSON.parse(JSON.stringify(origSchema));
+      const schemaInObjectNotaion = schemaInObjectNotation(localize, origSchema);
 
-        if (schemaStyle === 'object') {
-          let treeDef;
-          if (schemaInObjectNotaion['::type'] && schemaInObjectNotaion['::type'] === 'array') {
-            treeDef = objectToTree(schemaInObjectNotaion['::props'], localize, 'array');
-          } else {
-            treeDef = objectToTree(schemaInObjectNotaion, localize);
-          }
-          requestBodyDef.push(treeDef);
+      if (schemaStyle === 'object') {
+        let treeDef;
+        if (schemaInObjectNotaion['::type'] && schemaInObjectNotaion['::type'] === 'array') {
+          treeDef = objectToTree(schemaInObjectNotaion['::props'], localize, 'array');
         } else {
-          // Schema style is "tree."
-          let schemaTableTreeDef;
-          if (schemaInObjectNotaion['::type'] && schemaInObjectNotaion['::type'] === 'array') {
-            schemaTableTreeDef = objectToTableTree(schemaInObjectNotaion['::prop'], localize, 'array');
-          } else {
-            schemaTableTreeDef = objectToTableTree(schemaInObjectNotaion, localize);
-          }
-          if (schemaTableTreeDef && schemaTableTreeDef.length > 0 && Array.isArray(schemaTableTreeDef[0]) && schemaTableTreeDef[0].length > 0) {
-            schemaTableTreeDef.unshift([
-              { text: localize.name, style: ['sub', 'b', 'alternate'] },
-              { text: localize.type, style: ['sub', 'b', 'alternate'] },
-              { text: localize.description, style: ['sub', 'b', 'alternate'] },
-            ]);
+          treeDef = objectToTree(schemaInObjectNotaion, localize);
+        }
+        requestBodyDef.push(treeDef);
+      } else {
+        // Schema style is "tree."
+        let schemaTableTreeDef;
+        if (schemaInObjectNotaion['::type'] && schemaInObjectNotaion['::type'] === 'array') {
+          schemaTableTreeDef = objectToTableTree(schemaInObjectNotaion['::prop'], localize, 'array');
+        } else {
+          schemaTableTreeDef = objectToTableTree(schemaInObjectNotaion, localize);
+        }
+        if (schemaTableTreeDef && schemaTableTreeDef.length > 0 && Array.isArray(schemaTableTreeDef[0]) && schemaTableTreeDef[0].length > 0) {
+          schemaTableTreeDef.unshift([
+            { text: localize.name, style: ['sub', 'b', 'alternate'] },
+            { text: localize.type, style: ['sub', 'b', 'alternate'] },
+            { text: localize.description, style: ['sub', 'b', 'alternate'] },
+          ]);
 
-            requestBodyDef.push({
-              table: {
-                headerRows: 1,
-                body: schemaTableTreeDef,
-              },
-              layout: rowLinesTableLayout,
-              margin: [0, 3, 0, 0],
-            });
-          }
+          requestBodyDef.push({
+            table: {
+              headerRows: 1,
+              body: schemaTableTreeDef,
+            },
+            layout: rowLinesTableLayout,
+            margin: [0, 3, 0, 0],
+          });
         }
       }
-      content.push(requestBodyDef);
     }
+    content.push(requestBodyDef);
 
     if (includeExample) {
       content.push(getExamplesDef(contentTypeObj, localize.example));
     }
   }
+
   return content;
 }
 
@@ -281,7 +305,7 @@ function getResponseDef(responses, schemaStyle, localize, includeExample = false
       let origSchema = contentTypeObj.schema;
       if (origSchema) {
         origSchema = JSON.parse(JSON.stringify(origSchema));
-        const schemaInObjectNotaion = schemaInObjectNotation(origSchema);
+        const schemaInObjectNotaion = schemaInObjectNotation(localize, origSchema);
         if (schemaStyle === 'object') {
           let schemaTreeDef;
           if (schemaInObjectNotaion['::type'] && schemaInObjectNotaion['::type'] === 'array') {
@@ -299,10 +323,10 @@ function getResponseDef(responses, schemaStyle, localize, includeExample = false
           let rootObjectType;
           if (schemaInObjectNotaion['::type'] && schemaInObjectNotaion['::type'] === 'array') {
             schemaTableTreeDef = objectToTableTree(schemaInObjectNotaion['::props'], localize);
-            rootObjectType = [{ text: 'ARRAY OF OBJECT WITH BELOW STRUCTURE', style: ['sub', 'b', 'alternate'], colSpan: 3 }];
+            rootObjectType = [{ text: localize.arrayOfObjectWithBelowStructure, style: ['sub', 'b', 'alternate'], colSpan: 3 }];
           } else {
             schemaTableTreeDef = objectToTableTree(schemaInObjectNotaion, localize);
-            rootObjectType = [{ text: 'OBJECT WITH BELOW STRUCTURE', style: ['sub', 'b', 'alternate'], colSpan: 3 }];
+            rootObjectType = [{ text: localize.objectWithBelowStructure, style: ['sub', 'b', 'alternate'], colSpan: 3 }];
           }
           if (schemaTableTreeDef && schemaTableTreeDef.length > 0 && Array.isArray(schemaTableTreeDef[0]) && schemaTableTreeDef[0].length > 0) {
             schemaTableTreeDef.unshift(rootObjectType);
@@ -391,11 +415,11 @@ export function getApiDef(spec, filterPath, schemaStyle, localize, includeExampl
       const headerParams = path.parameters ? path.parameters.filter((param) => param.in === 'header') : null;
       const cookieParams = path.parameters ? path.parameters.filter((param) => param.in === 'cookie') : null;
 
-      const pathParamTableDef = getParameterTableDef(pathParams, 'path', localize, includeExample);
-      const queryParamTableDef = getParameterTableDef(queryParams, 'query', localize, includeExample);
+      const pathParamTableDef = getParameterTableDef(pathParams, 'Path', localize, includeExample);
+      const queryParamTableDef = getParameterTableDef(queryParams, 'Query', localize, includeExample);
       const requestBodyTableDefs = getRequestBodyDef(path.requestBody, schemaStyle, localize, includeExample);
-      const headerParamTableDef = getParameterTableDef(headerParams, 'header', localize, includeExample);
-      const cookieParamTableDef = getParameterTableDef(cookieParams, 'cookie', localize, includeExample);
+      const headerParamTableDef = getParameterTableDef(headerParams, 'Header', localize, includeExample);
+      const cookieParamTableDef = getParameterTableDef(cookieParams, 'Cookie', localize, includeExample);
       operationContent.push({ text: localize.request, style: ['p', 'b', 'alternate'], margin: [0, 10, 0, 0] });
       if (pathParamTableDef || queryParamTableDef || headerParamTableDef || cookieParamTableDef || requestBodyTableDefs) {
         if (pathParamTableDef) {
